@@ -2,7 +2,7 @@ package main
 
 import (
 	"GitHubEvent/API"
-	"GitHubEvent/Format"
+	format "GitHubEvent/Format"
 	"fmt"
 )
 

@@ -4,7 +4,6 @@ import (
 	"GitHubEvent/modules"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 )
@@ -20,12 +19,6 @@ func ParseJSONResponse(resp *http.Response) ([]modules.Event, error) {
 		return nil, fmt.Errorf("failed to parse response: %v", err)
 	}
 	return events, nil
-}
-
-func HandleError(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func FetchGitHubActivity(username string) ([]modules.Event, error) {
