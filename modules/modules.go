@@ -35,8 +35,8 @@ type Event struct {
 }
 
 type Details struct {
-	RepoName string `json:"repo_name"`
-	TimeAgo  string `json:"time_ago"`
-	RepoLink string `json:"repo_link"`
+	RepoName  string `json:"repo_name"`
+	TimeAgo   string `json:"time_ago"`
+	RepoLink  string `json:"repo_link"`
 	EventType string `json:"event_type"`
 }
