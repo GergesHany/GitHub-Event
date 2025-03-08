@@ -1,27 +1,26 @@
 package main
 
 import (
-	"fmt"
-	"time"
 	"GitHubEvent/API"
+	"GitHubEvent/Format"
+	"fmt"
 )
 
+
 func main() {
-	
-	username := "Gergeshany"
+
+	var username string
+	fmt.Print(format.ColorBlue + "Enter GitHub username: " + format.ColorReset)
+
+	fmt.Scanln(&username)
+	fmt.Println(format.ColorBlue + "Fetching GitHub activity for " + username + "..." + format.ColorReset)
+
 	events, err := API.FetchGitHubActivity(username)
 
 	if err != nil {
-		fmt.Printf("Error fetching GitHub activity: %v\n", err)
-        return
+		fmt.Println(format.ColorRed + "Error fetching GitHub activity: " + err.Error() + format.ColorReset)
+		return
 	}
 
-	for _, event := range events {
-		fmt.Printf("%s - %s: %s\n", event.CreatedAt.Format(time.RFC1123Z), event.Type, event.Repo.Name)
-        if event.Payload.Issue.Number != 0 {
-            fmt.Printf("\tIssue: %d - %s\n", event.Payload.Issue.Number, event.Payload.Issue.Title)
-        } else if event.Payload.PullRequest.Number != 0 {
-            fmt.Printf("\tPull Request: %d - %s\n", event.Payload.PullRequest.Number, event.Payload.PullRequest.Title)
-        }
-    }
+	format.DisplayActivity(events)
 }
