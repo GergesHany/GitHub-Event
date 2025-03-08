@@ -4,6 +4,7 @@ import (
 	"GitHubEvent/modules"
 	"fmt"
 	"time"
+	"strings"
 )
 
 const (
@@ -15,6 +16,14 @@ const (
 	ColorRed    = "\033[31m"
 )
 
+func GetRepoLink(repo string) (string) {
+	idx := strings.Index(repo, "(")
+	if idx != -1 {
+      	repo = repo[:idx]
+	}
+	return fmt.Sprintf("https://github.com/%s", repo)
+}
+
 func DisplayActivity(events []modules.Event) {
 	if len(events) == 0 {
 		fmt.Println(ColorRed + "No recent activity found." + ColorReset)
@@ -24,12 +33,12 @@ func DisplayActivity(events []modules.Event) {
 	fmt.Println(ColorGreen + "Recent GitHub activity:" + ColorReset)
 	fmt.Println(ColorGreen + "----------------------" + ColorReset)
 
-	mapping := make(map[string][]string)
+	mapping := make(map[string][]modules.Details)
 
 	for _, event := range events {
-		Type, Format := FormatEvent(event)
-		if Type != "" {
-			mapping[Type] = append(mapping[Type], Format)
+		Details := FormatEvent(event)
+		if Details.RepoName != "" {
+			mapping[Details.RepoName] = append(mapping[Details.RepoName], Details)
 		}
 	}
 
@@ -37,61 +46,48 @@ func DisplayActivity(events []modules.Event) {
 		i := 1
 		fmt.Println(ColorBlue + Type + ColorReset + " {")
 		for _, Format := range Formats {
-			fmt.Printf(ColorCyan+" %d. %s\n"+ColorReset, i, Format)
+			fmt.Println(ColorYellow + "  {")
+			fmt.Println(ColorCyan + "    Repo Name: " + ColorRed + Format.RepoName + ColorReset)
+			fmt.Println(ColorCyan + "    Time Ago: " + ColorRed + Format.TimeAgo + ColorReset)
+			fmt.Println(ColorCyan + "    Repo Link: " + ColorRed + Format.RepoLink + ColorReset)
+			fmt.Println(ColorCyan + "    Event Type: " + ColorRed + Format.EventType + ColorReset)
+			if i < len(mapping[Type]) {
+				fmt.Println(ColorYellow + "  },")
+			} else {
+				fmt.Println(ColorYellow + "  }" + ColorReset)
+			}
 			i++
 		}
 		fmt.Println("}")
+		fmt.Println("")
 	}
 }
 
-func FormatEvent(event modules.Event) (string, string) {
+func FormatEvent(event modules.Event) modules.Details {
 	repoName := event.Repo.Name
 	timeAgo := formatTimeAgo(event.CreatedAt)
 
 	switch event.Type {
-	case "PushEvent":
-		return "Pushed to", fmt.Sprintf("%s (%s)", repoName, timeAgo)
-
 	case "CreateEvent":
 		if event.Payload.RefType == "repository" {
-			return "Created repository", fmt.Sprintf("%s (%s)", repoName, timeAgo)
+			return modules.Details{EventType: "Created repository", RepoName: repoName, TimeAgo: timeAgo, RepoLink: GetRepoLink(repoName)}
+
 		} else if event.Payload.RefType == "branch" {
-			return "Created branch", fmt.Sprintf("%s in %s (%s)", event.Payload.Ref, repoName, timeAgo)
+			return modules.Details{EventType: "Created branch", RepoName: repoName, TimeAgo: timeAgo, RepoLink: GetRepoLink(repoName)}
 		}
 
-	case "IssuesEvent":
-		return "IssuesEvent", fmt.Sprintf("- %s issue #%d in %s: %s (%s)",
-			capitalize(event.Payload.Action),
-			event.Payload.Issue.Number,
-			repoName,
-			event.Payload.Issue.Title,
-			timeAgo)
-
-	case "IssueCommentEvent":
-		return "IssueCommentEvent", fmt.Sprintf("- Commented on issue in %s (%s)", repoName, timeAgo)
-
-	case "PullRequestEvent":
-		return "PullRequestEvent", fmt.Sprintf("- %s pull request #%d in %s (%s)",
-			capitalize(event.Payload.Action),
-			event.Payload.PullRequest.Number,
-			repoName,
-			timeAgo)
-
-	case "WatchEvent":
-		return "WatchEvent", fmt.Sprintf("- Starred %s (%s)", repoName, timeAgo)
-
-	case "ForkEvent":
-		return "ForkEvent", fmt.Sprintf("- Forked %s (%s)", repoName, timeAgo)
+		default:
+			return modules.Details{EventType: capitalize(event.Type), RepoName: repoName, TimeAgo: timeAgo, RepoLink: GetRepoLink(repoName)}
 	}
 
-	return "", ""
+	return modules.Details{}
 }
 
 func capitalize(s string) string {
-	if s == "" {
-		return ""
-	}
-	return fmt.Sprintf("%s%s", string(s[0]-32), s[1:])
+    if s == "" {
+        return ""
+    }
+    return strings.ToUpper(s[:1]) + s[1:]
 }
 
 func formatTimeAgo(t time.Time) string {

@@ -33,3 +33,10 @@ type Event struct {
 	Repo      Repo      `json:"repo"`
 	Payload   Payload   `json:"payload"`
 }
+
+type Details struct {
+	RepoName string `json:"repo_name"`
+	TimeAgo  string `json:"time_ago"`
+	RepoLink string `json:"repo_link"`
+	EventType string `json:"event_type"`
+}
