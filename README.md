@@ -2,7 +2,13 @@
 
 A command-line tool that fetches and displays a GitHub user's recent activity with color-coded organization and visualization.
 
-<!-- ![GitHub Activity CLI Demo] -->
+
+![Screenshot from 2025-03-08 10-00-37](https://github.com/user-attachments/assets/89aded40-a495-4fd4-842f-e72c89e36598)
+
+---
+
+![Screenshot from 2025-03-08 10-00-50](https://github.com/user-attachments/assets/382ff377-0c06-47de-9308-dd7f451722e3)
+
 
 <hr>
 
